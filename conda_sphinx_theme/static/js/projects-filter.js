@@ -11,7 +11,7 @@
       if (!input) continue;
 
       const items = Array.from(menu.querySelectorAll("li")).filter((li) =>
-        li.querySelector(".dropdown-item.nav-external, .dropdown-item.nav-internal")
+        li.querySelector(".dropdown-item.nav-external")
       );
       const headers = Array.from(menu.querySelectorAll(".dropdown-header"));
       const dividers = Array.from(

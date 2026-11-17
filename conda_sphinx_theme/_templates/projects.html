@@ -3,10 +3,40 @@
     let the table use the full width. -#}
 {% set sidebars = [] %}
 
+{% macro links_cell(entry) %}
+  <td>
+    <span class="d-inline-flex gap-2">
+      <a href="{{ entry.docs }}">
+        <i class="fa-solid fa-book" aria-hidden="true"></i>
+        <span class="sr-only">{{ entry.name }} {{ _("documentation") }}</span>
+      </a>
+      {%- if entry.github %}
+      <a href="{{ entry.github }}">
+        <i class="fa-brands fa-github" aria-hidden="true"></i>
+        <span class="sr-only">{{ entry.name }} {{ _("on GitHub") }}</span>
+      </a>
+      {%- endif %}
+    </span>
+  </td>
+{% endmacro %}
+
+{% macro releases_cell(entry) %}
+  <td>
+    {%- set pkg = entry.package or entry.name %}
+    {%- for channel in (entry.channels if entry.channels is defined else ["main", "conda-forge"]) %}
+    <a href="https://anaconda.org/{{ channel }}/{{ pkg }}"
+       title="{{ pkg }} {{ _("on the") }} {{ channel }} {{ _("channel") }}">
+      <img src="https://img.shields.io/conda/vn/{{ channel }}/{{ pkg }}.svg"
+           alt="{{ pkg }} {{ _("version on") }} {{ channel }}" loading="lazy" height="20">
+    </a>
+    {%- endfor %}
+  </td>
+{% endmacro %}
+
 {% block body %}
-<h1>{{ _("Projects") }}</h1>
-<p>Documentation, source code and release channels for projects in the conda
-ecosystem.</p>
+<h1>{{ _("All projects") }}</h1>
+<p>Documentation, source code and release channels for the projects and plugins
+below.</p>
 <h2>{{ _("Projects") }}</h2>
 <div class="table-responsive">
 <table class="table table-hover align-middle">
@@ -20,35 +50,13 @@ ecosystem.</p>
   <tbody>
     {%- for entry in theme_projects %}
     {%- set current = entry.name == project %}
-    {%- set pkg = entry.package or entry.name %}
     <tr{% if current %} class="table-active"{% endif %}>
       <th scope="row">
         <a href="{{ pathto(root_doc) if current else entry.docs }}">{{ entry.name }}</a>
         {%- if current %} <span class="badge text-bg-secondary">{{ _("this site") }}</span>{% endif %}
       </th>
-      <td>
-        <span class="d-inline-flex gap-2">
-          <a href="{{ entry.docs }}">
-            <i class="fa-solid fa-book" aria-hidden="true"></i>
-            <span class="sr-only">{{ entry.name }} {{ _("documentation") }}</span>
-          </a>
-          {%- if entry.github %}
-          <a href="{{ entry.github }}">
-            <i class="fa-brands fa-github" aria-hidden="true"></i>
-            <span class="sr-only">{{ entry.name }} {{ _("on GitHub") }}</span>
-          </a>
-          {%- endif %}
-        </span>
-      </td>
-      <td>
-        {%- for channel in (entry.channels if entry.channels is defined else ["main", "conda-forge"]) %}
-        <a href="https://anaconda.org/{{ channel }}/{{ pkg }}"
-           title="{{ pkg }} {{ _("on the") }} {{ channel }} {{ _("channel") }}">
-          <img src="https://img.shields.io/conda/vn/{{ channel }}/{{ pkg }}.svg"
-               alt="{{ pkg }} {{ _("version on") }} {{ channel }}" loading="lazy" height="20">
-        </a>
-        {%- endfor %}
-      </td>
+      {{- links_cell(entry) }}
+      {{- releases_cell(entry) }}
     </tr>
     {%- endfor %}
   </tbody>
@@ -74,32 +82,10 @@ name.</p>
   </thead>
   <tbody>
     {%- for entry in theme_plugins %}
-    {%- set pkg = entry.package or entry.name %}
     <tr>
       <th scope="row"><a href="{{ entry.docs }}">{{ entry.name }}</a></th>
-      <td>
-        <span class="d-inline-flex gap-2">
-          <a href="{{ entry.docs }}">
-            <i class="fa-solid fa-book" aria-hidden="true"></i>
-            <span class="sr-only">{{ entry.name }} {{ _("documentation") }}</span>
-          </a>
-          {%- if entry.github %}
-          <a href="{{ entry.github }}">
-            <i class="fa-brands fa-github" aria-hidden="true"></i>
-            <span class="sr-only">{{ entry.name }} {{ _("on GitHub") }}</span>
-          </a>
-          {%- endif %}
-        </span>
-      </td>
-      <td>
-        {%- for channel in (entry.channels if entry.channels is defined else ["main", "conda-forge"]) %}
-        <a href="https://anaconda.org/{{ channel }}/{{ pkg }}"
-           title="{{ pkg }} {{ _("on the") }} {{ channel }} {{ _("channel") }}">
-          <img src="https://img.shields.io/conda/vn/{{ channel }}/{{ pkg }}.svg"
-               alt="{{ pkg }} {{ _("version on") }} {{ channel }}" loading="lazy" height="20">
-        </a>
-        {%- endfor %}
-      </td>
+      {{- links_cell(entry) }}
+      {{- releases_cell(entry) }}
     </tr>
     {%- endfor %}
   </tbody>

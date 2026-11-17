@@ -160,7 +160,7 @@ def test_get_projects_page(mocker):
     assert pagename == "projects"
     assert template == "projects.html"
     assert context["conda_page"] == "projects"
-    assert context["title"] == "Projects"
+    assert context["title"] == "All projects"
 
 
 def test_get_projects_page_disabled(mocker):
@@ -264,14 +264,18 @@ def test_plugins_inherit_project_package_and_channels(mocker):
                     "channels": ["conda-forge"],
                 }
             ],
-            "plugins": [
-                {
-                    "name": "conda_build",
-                    "repo_url": "https://github.com/conda/conda-build",
-                    "category": "Build tools",
-                }
-            ],
+            "plugins_json_url": "https://plugins.example/plugins.json",
         },
+    )
+    mocker.patch(
+        "conda_sphinx_theme.fetch_plugins",
+        return_value=[
+            {
+                "name": "conda_build",
+                "repo_url": "https://github.com/conda/conda-build",
+                "category": "Build tools",
+            }
+        ],
     )
     set_config_defaults(app)
 
@@ -293,14 +297,18 @@ def test_plugins_win_over_projects(mocker):
                 {"name": "conda", "docs": "https://docs.example/conda"},
                 {"name": "conda-build", "docs": "https://docs.example/build"},
             ],
-            "plugins": [
-                {
-                    "name": "conda-build",
-                    "docs": "https://plugins.example/build",
-                    "repo_url": "https://github.com/conda/conda-build",
-                }
-            ],
+            "plugins_json_url": "https://plugins.example/plugins.json",
         },
+    )
+    mocker.patch(
+        "conda_sphinx_theme.fetch_plugins",
+        return_value=[
+            {
+                "name": "conda-build",
+                "docs": "https://plugins.example/build",
+                "repo_url": "https://github.com/conda/conda-build",
+            }
+        ],
     )
     set_config_defaults(app)
 

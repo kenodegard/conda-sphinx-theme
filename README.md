@@ -93,8 +93,8 @@ section on the projects page.
   (`conda_lock` -> `conda-lock`), or the package/channels of the matching project
   entry when there is one.
 - If the list cannot be read the build logs a warning and continues with
-  projects only. Set `plugins_json_url = ""` to skip plugins, or `plugins` to
-  supply a list directly (useful for offline builds). Each badge is labelled with its channel name and links to
+  projects only. Set `plugins_json_url = ""` to skip plugins, or point it at a
+  `file://` URL for an offline build. Each badge is labelled with its channel name and links to
 the corresponding anaconda.org page. Set `projects_page = false` in `html_theme_options` to
 skip it, and set `projects` there to use a different list for one project.
 

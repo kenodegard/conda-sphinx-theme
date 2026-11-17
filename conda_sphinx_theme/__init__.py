@@ -116,24 +116,19 @@ def set_config_defaults(app):
                 "'name' and 'docs' are required"
             )
 
-    # Plugin list from conda-plugins, unless the project supplied one
-    plugins = theme.get("plugins")
-    if plugins:
-        plugins = normalize_plugins(plugins, projects)
-    else:
-        plugins = []
-        if plugins_url := theme.get("plugins_json_url"):
-            try:
-                payload = fetch_plugins(plugins_url)
-            except (OSError, ValueError) as exc:
-                logger.warning(
-                    "conda-sphinx-theme: could not read plugins from %s (%s), "
-                    "continuing with projects only",
-                    plugins_url,
-                    exc,
-                )
-            else:
-                plugins = normalize_plugins(payload, projects)
+    # Plugin list from the conda-plugins site; point plugins_json_url at a
+    # file:// URL for an offline build, or empty to skip plugins
+    plugins = []
+    if plugins_url := theme.get("plugins_json_url"):
+        try:
+            plugins = normalize_plugins(fetch_plugins(plugins_url), projects)
+        except (OSError, ValueError) as exc:
+            logger.warning(
+                "conda-sphinx-theme: could not read plugins from %s (%s), "
+                "continuing with projects only",
+                plugins_url,
+                exc,
+            )
     theme["plugins"] = plugins
 
     # A plugin entry wins over a project entry with the same name
@@ -192,7 +187,7 @@ def get_projects_page(app):
         return
     yield (
         "projects",
-        {"conda_page": "projects", "title": "Projects", "parents": []},
+        {"conda_page": "projects", "title": "All projects", "parents": []},
         "projects.html",
     )
 
