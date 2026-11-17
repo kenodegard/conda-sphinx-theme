@@ -29,12 +29,15 @@ html_theme = 'conda_sphinx_theme'
 ## Navigation
 
 The navbar links to the other documentation sites in the conda ecosystem, and the
-theme ships the list. The site being viewed leads the navbar, every other entry
-folds into a dropdown menu, and `conda.org` always shows at the end.
+theme ships the list. The site being viewed appears as the title next to the logo
+(the logo already links to the docs root), every other entry folds into a
+`Projects` menu, and `conda.org` sits at the other end of the header with the
+search field, the icon links and the theme toggle.
 
 The list lives in
-[`conda_sphinx_theme/projects.json`](conda_sphinx_theme/projects.json). To add or
-reorder a site, edit that file:
+[`conda_sphinx_theme/projects.json`](conda_sphinx_theme/projects.json). To add a
+site, edit that file; entries are shown alphabetically by `name`, in the navbar
+and on the projects page alike, whatever order they are stored in:
 
 ```json
 [
@@ -73,8 +76,25 @@ a filter box above the entries ("All projects" stays visible). Without
 JavaScript the filter is hidden and the plain list remains.
 
 The theme also generates a `/projects` page listing every entry in a table, with
-documentation and source links plus version badges for each configured channel,
-sorted alphabetically. Each badge is labelled with its channel name and links to
+documentation and source links plus version badges for each configured channel.
+
+## Plugins
+
+Plugins come from the [conda-plugins index](https://conda-incubator.github.io/conda-plugins/):
+at build time the theme reads `plugins.json` from `plugins_json_url` (on by
+default) and lists the plugins as a second group in the navbar menu and a second
+section on the projects page.
+
+- Plugin entries win over project entries with the same name (case and `_`/`-`
+  ignored), so a project that is also a plugin is listed once, as a plugin.
+- A plugin without a documentation site links to the matching project's docs,
+  then to its repository.
+- Plugins get version badges too, looked up under the PEP 503 form of their name
+  (`conda_lock` -> `conda-lock`), or the package/channels of the matching project
+  entry when there is one.
+- If the list cannot be read the build logs a warning and continues with
+  projects only. Set `plugins_json_url = ""` to skip plugins, or `plugins` to
+  supply a list directly (useful for offline builds). Each badge is labelled with its channel name and links to
 the corresponding anaconda.org page. Set `projects_page = false` in `html_theme_options` to
 skip it, and set `projects` there to use a different list for one project.
 

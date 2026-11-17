@@ -183,24 +183,34 @@ a.navbar-brand > p.title {
     margin-left: 1rem;
 }
 
-/* Mark the projects dropdown when the current project is one of its entries */
-.navbar-nav > li.nav-item.current > .dropdown-toggle {
+/* The projects label sits in the nav row, so match the link padding. pydata's
+   own rule colours a labelled dropdown with --pst-color-text-muted. */
+.bd-header #navbar-main-elements .dropdown-toggle {
+    padding: 0.25rem 0.375rem;
+}
+
+/* The site being viewed is a title in the brand block, not a nav tab */
+.bd-header #navbar-main-elements > .conda-site-title {
+    color: var(--pst-color-text-base);
+    font-weight: 600;
+    padding-inline: 0.375rem 1.25rem;
+    border-right: 1px solid var(--pst-color-border);
+    margin-right: 0.5rem;
+}
+
+/* In the drawer the header's end block (conda.org, the icon links and the theme
+   toggle) follows the whole project list; separate it from what comes before */
+.bd-sidebar-primary .sidebar-header-items__end {
+    border-top: 1px solid var(--pst-color-border);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+/* The mobile drawer lists every site; mark the one being viewed, since pydata's
+   active styling only covers the header row */
+.bd-sidebar-primary #navbar-main-elements > .nav-item.current > .nav-link {
     color: var(--pst-color-primary);
-}
-
-/* Right-align the conda.org link: let the navbar list span the header and push
-   its last entry over. Scoped to the header so the mobile sidebar list, which
-   reuses the same template, stays left-aligned. */
-.bd-header .navbar-header-items__center,
-.bd-header .navbar-header-items__center > .navbar-item,
-.bd-header #navbar-main-elements {
-    flex-grow: 1;
-}
-
-.bd-header #navbar-main-elements > .nav-item:last-child {
-    /* matches the header's own column gap, so it does not touch the icon links */
-    margin-left: auto;
-    margin-right: 1.12rem;
+    font-weight: 600;
 }
 
 /* Keep the project menu inside the viewport and scrollable when it is long */

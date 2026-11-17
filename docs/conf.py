@@ -6,25 +6,23 @@ from importlib.metadata import version as get_version
 # conda projects.
 
 # Release mode enables optimizations and other related options.
-is_release_build = tags.has('release')  # noqa
+is_release_build = tags.has("release")  # noqa
 
 # Parse year using SOURCE_DATE_EPOCH, falling back to current time.
 # https://reproducible-builds.org/specs/source-date-epoch/
 build_date = datetime.datetime.utcfromtimestamp(
-    int(os.environ.get('SOURCE_DATE_EPOCH', time.time()))
+    int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
 )
 
 # -- Project information -----------------------------------------------------
 
 project = "Conda Sphinx Theme"
-copyright = (
-    f"2023 conda-incubator"
-)
+copyright = f"2023 conda-incubator"
 author = "conda-incubator"
 
 release: str = get_version("conda_sphinx_theme")
 # for example take major/minor
-version: str = ".".join(release.split('.')[:2])
+version: str = ".".join(release.split(".")[:2])
 
 # -- General configuration ---------------------------------------------------
 
@@ -55,6 +53,9 @@ html_theme_options = {
     # "projects": [],
     # Set to False to skip generating the "Projects" page.
     # "projects_page": False,
+    # Plugin list from conda-plugins; the theme's own docs do not need it, and
+    # leaving it empty keeps this build hermetic. Consumers get it by default.
+    "plugins_json_url": "",
 }
 
 html_context = {

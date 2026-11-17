@@ -7,6 +7,7 @@ except ImportError:  # pragma: no cover
 
 import json
 from pathlib import Path
+from urllib.request import urlopen
 
 from sphinx.util import logging
 
@@ -15,6 +16,60 @@ logger = logging.getLogger(__name__)
 # theme.conf values arrive as strings, while html_theme_options can supply real
 # booleans; these are the spellings that mean False.
 FALSE_VALUES = frozenset({"false", "0", "no", "off"})
+
+# Seconds to wait for the conda-plugins list before giving up on it
+PLUGINS_TIMEOUT = 10
+
+
+def project_key(name):
+    """Identity of a project/plugin name, ignoring case and separators."""
+    return name.lower().replace("_", "-")
+
+
+def fetch_plugins(url):
+    """Load the plugin list published by the conda-plugins site."""
+    with urlopen(url, timeout=PLUGINS_TIMEOUT) as response:
+        return json.loads(response.read())
+
+
+def normalize_plugins(payload, projects):
+    """Shape conda-plugins entries like project entries, newest data first.
+
+    A plugin without its own documentation site falls back to the matching
+    project's docs URL, then to its repository.
+    """
+    if isinstance(payload, dict):
+        # conda-plugins publishes {"categories": [...], "plugins": [...]}
+        payload = payload.get("plugins", [])
+    if not isinstance(payload, list):
+        logger.warning("conda-sphinx-theme: plugin payload is not a list of plugins")
+        return []
+    project_by_key = {project_key(entry["name"]): entry for entry in projects}
+    plugins = []
+    seen = set()
+    for entry in payload:
+        if not isinstance(entry, dict) or not entry.get("name"):
+            continue
+        name = entry["name"]
+        key = project_key(name)
+        project = project_by_key.get(key, {})
+        github = entry.get("repo_url") or entry.get("github")
+        docs = entry.get("docs") or project.get("docs") or github
+        if not docs or key in seen:
+            continue
+        seen.add(key)
+        plugins.append(
+            {
+                # keep curated package/channels when the plugin is also a project
+                **project,
+                "name": name,
+                "docs": docs,
+                "github": github,
+                "package": project.get("package") or key,
+                "category": entry.get("category"),
+            }
+        )
+    return sorted(plugins, key=lambda entry: entry["name"].lower())
 
 
 def set_config_defaults(app):
@@ -60,6 +115,33 @@ def set_config_defaults(app):
                 f"conda-sphinx-theme: invalid project entry {entry!r}, "
                 "'name' and 'docs' are required"
             )
+
+    # Plugin list from conda-plugins, unless the project supplied one
+    plugins = theme.get("plugins")
+    if plugins:
+        plugins = normalize_plugins(plugins, projects)
+    else:
+        plugins = []
+        if plugins_url := theme.get("plugins_json_url"):
+            try:
+                payload = fetch_plugins(plugins_url)
+            except (OSError, ValueError) as exc:
+                logger.warning(
+                    "conda-sphinx-theme: could not read plugins from %s (%s), "
+                    "continuing with projects only",
+                    plugins_url,
+                    exc,
+                )
+            else:
+                plugins = normalize_plugins(payload, projects)
+    theme["plugins"] = plugins
+
+    # A plugin entry wins over a project entry with the same name
+    plugin_names = {project_key(entry["name"]) for entry in plugins}
+    projects = [p for p in projects if project_key(p["name"]) not in plugin_names]
+
+    # One canonical order for the navbar and the projects page
+    theme["projects"] = sorted(projects, key=lambda entry: entry["name"].lower())
 
     # theme.conf values arrive as strings; normalize so templates and the
     # html-collect-pages hook agree
